@@ -6,6 +6,7 @@ include 'libs/load.php';
 
 <!doctype html>
 <html lang="en">
+<<<<<<< HEAD
 
 <head>
     <meta charset="utf-8">
@@ -61,6 +62,13 @@ include 'libs/load.php';
         </div>
         <?load_template('_header');?>
     </header>
+=======
+<?load_template('_head');?>
+
+<body>
+
+    <?load_template('_header');?>
+>>>>>>> be93b5e (db test)
     <main>
 
         <?load_template('_calltoaction');?>

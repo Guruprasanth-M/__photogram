@@ -1,0 +1,146 @@
+/* Black / dark theme override for entire app
+   Overwrites previous login.css with unified dark theme
+*/
+
+:root{
+    --bg:#0b0b0d;
+    --theme-id: "dark-2026-01-15T12:00:00Z";
+    --surface:#121215;
+    --muted:#9aa3ad;
+    --text:#e6eef6;
+    --accent:#1f74ff;
+    --accent-2:#00c6a7;
+    --danger:#ff6b6b;
+    --border: rgba(255,255,255,0.06);
+}
+
+html,body{
+    height:100%;
+    background:var(--bg);
+    color:var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+}
+
+.container, .card, .bg-light, .modal-content, .navbar, .jumbotron, main {
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border: 1px solid var(--border);
+    color:var(--text);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+}
+
+h1,h2,h3,h4,h5,h6 { color:var(--text); }
+.lead { color:var(--muted); }
+
+a { color:var(--accent); text-decoration:underline; }
+a:hover, a:focus { color:var(--accent-2); text-decoration:none; }
+
+.btn, button {
+    background: linear-gradient(180deg, var(--accent), #155fdb);
+    color:#fff;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 4px 12px rgba(31,116,255,0.12);
+}
+.btn-secondary {
+    background: linear-gradient(180deg,#2b2f33,#1f2225);
+    color:var(--text);
+    border:1px solid var(--border);
+}
+.btn-outline-primary {
+    background:transparent;
+    color:var(--accent);
+    border:1px solid rgba(31,116,255,0.25);
+}
+.btn:hover, .btn:focus { transform: translateY(-1px); }
+
+.form-control, input[type="text"], input[type="email"], input[type="password"], textarea, select {
+    background: linear-gradient(180deg,var(--surface), #0f1113);
+    color:var(--text);
+    border:1px solid var(--border);
+    box-shadow: none;
+    outline: none;
+}
+.form-control::placeholder { color: rgba(230,238,246,0.45); }
+.form-floating label { color:var(--muted); }
+
+.navbar, .navbar-expand, .navbar-light, .navbar-dark {
+    background: linear-gradient(180deg,#0d0d0f,#070708);
+    border-bottom:1px solid var(--border);
+}
+.navbar a, .nav-link { color:var(--text); }
+.navbar a:hover { color:var(--accent); }
+
+.table {
+    color:var(--text);
+    border-collapse: collapse;
+}
+.table thead th { color:var(--muted); border-bottom:1px solid var(--border); }
+.table tbody tr { border-bottom:1px solid rgba(255,255,255,0.03); }
+.table-striped tbody tr:nth-of-type(odd) { background: rgba(255,255,255,0.01); }
+
+.card { background:linear-gradient(180deg,#0f1113,#0b0b0d); border:1px solid var(--border); }
+
+.alert { background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); color:var(--text); border:1px solid var(--border); }
+.alert-danger { background: linear-gradient(180deg,#2b0b0b,#180606); color:var(--danger); }
+
+.form-signup {
+    max-width: 420px;
+    margin: 32px auto;
+    padding: 28px;
+    border-radius: 8px;
+}
+.form-signup .mb-4 img { filter: brightness(0) invert(1); }
+
+small, .small { color:var(--muted); }
+
+.text-muted { color:var(--muted) !important; }
+.bg-white { background:transparent !important; color:var(--text) !important; }
+
+.form-control:focus, .btn:focus, .nav-link:focus {
+    box-shadow: 0 0 0 0.2rem rgba(31,116,255,0.12);
+    border-color: rgba(31,116,255,0.6);
+}
+
+@media (max-width:575px){
+    .form-signup { padding:20px; margin:16px; }
+}
+
+@media (prefers-contrast: more) {
+    :root { --border: rgba(255,255,255,0.12); }
+    .form-control { border-width:2px; }
+}
+.bd-placeholder-img {
+    font-size: 1.125rem;
+    text-anchor: middle;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+.form-signin {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: auto;
+}
+
+.form-signin .checkbox {
+    font-weight: 400;
+}
+
+.form-signin .form-floating:focus-within {
+    z-index: 2;
+}
+
+.form-signin input[type="email"] {
+    margin-bottom: -1px;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+    margin-bottom: 10px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
