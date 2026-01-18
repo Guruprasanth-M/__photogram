@@ -2,16 +2,20 @@
 
 class User
 {
-    public function __call($name, $arguments){
+    private $conn;
+    private $username;
+    public $id;
+
+    public function __call($name, $arguments)
+    {
         $property = preg_replace("/[^0-9a-zA-Z]/", "", substr($name, 3));
         $property = strtolower(preg_replace('/\B([A-Z])/', '_$1', $property));
-        if (substr($property, -5) === 'link') {
-            $property = substr($property, 0, -5);
-        }
         if (substr($name, 0, 3) == "get") {
             return $this->_get_data($property);
         } elseif (substr($name, 0, 3) == "set") {
             return $this->_set_data($property, $arguments[0]);
+        } else {
+            throw new Exception("User::__call() -> $name, function unavailable.");
         }
     }
 
@@ -23,11 +27,14 @@ class User
         $pass = password_hash($pass, PASSWORD_BCRYPT, $options);
         $conn = Database::getConnection();
         $sql = "INSERT INTO `auth` (`username`, `password`, `email`, `phone`, `active`) VALUES ('"
-            . $conn->real_escape_string($user) . "', '" . $conn->real_escape_string($pass) . "', '" . $conn->real_escape_string($email) . "', '" . $conn->real_escape_string($phone) . "', '0')";
+            . $conn->real_escape_string($user) . "', '" 
+            . $conn->real_escape_string($pass) . "', '" 
+            . $conn->real_escape_string($email) . "', '" 
+            . $conn->real_escape_string($phone) . "', '0')";
 
         try {
             if ($conn->query($sql) === true) {
-                return true; // success
+                return true;
             } else {
                 return $conn->error;
             }
@@ -77,11 +84,14 @@ class User
             return null;
         }
         $id = (int)$this->id;
-        // ensure column exists first to avoid SQL errors
-        $colRes = $this->conn->query("SHOW COLUMNS FROM `users` LIKE '" . $this->conn->real_escape_string($var) . "'");
+        $var_esc = $this->conn->real_escape_string($var);
+        
+        // Ensure column exists first to avoid SQL errors
+        $colRes = $this->conn->query("SHOW COLUMNS FROM `users` LIKE '" . $var_esc . "'");
         if (!($colRes && $colRes->num_rows == 1)) {
             return null;
         }
+        
         $sql = "SELECT `$var` FROM `users` WHERE `id` = $id LIMIT 1";
         $result = $this->conn->query($sql);
         if ($result && $result->num_rows == 1) {
@@ -91,7 +101,7 @@ class User
         return null;
     }
 
-    //This function helps to  set the data in the database
+    // FIXED: Works regardless of PRIMARY KEY setup
     private function _set_data($var, $data)
     {
         if (!$this->conn) {
@@ -102,18 +112,35 @@ class User
         }
         $id = (int)$this->id;
         $safe = $this->conn->real_escape_string($data);
-        // ensure column exists before attempting update
-        $colRes = $this->conn->query("SHOW COLUMNS FROM `users` LIKE '" . $this->conn->real_escape_string($var) . "'");
+        $var_esc = $this->conn->real_escape_string($var);
+        
+        // Ensure column exists before attempting update
+        $colRes = $this->conn->query("SHOW COLUMNS FROM `users` LIKE '" . $var_esc . "'");
         if (!($colRes && $colRes->num_rows == 1)) {
-            // column missing — avoid throwing SQL error
             error_log('User::_set_data missing column: ' . $var);
             return false;
         }
-        $sql = "UPDATE `users` SET `$var`='" . $safe . "' WHERE `id`=$id LIMIT 1";
+        
+        // First, check if row exists
+        $check = $this->conn->query("SELECT `id` FROM `users` WHERE `id` = $id LIMIT 1");
+        
+        if ($check && $check->num_rows > 0) {
+            // Row exists - UPDATE it
+            $sql = "UPDATE `users` SET `$var`='" . $safe . "' WHERE `id`=$id LIMIT 1";
+        } else {
+            // Row doesn't exist - INSERT it
+            $sql = "INSERT INTO `users` (`id`, `$var`) VALUES ($id, '" . $safe . "')";
+        }
+        
         try {
-            return (bool)$this->conn->query($sql);
+            if ($this->conn->query($sql)) {
+                return true;
+            } else {
+                error_log('User::_set_data query failed: ' . $this->conn->error . ' | SQL: ' . $sql);
+                return false;
+            }
         } catch (mysqli_sql_exception $e) {
-            error_log('User::_set_data query error: ' . $e->getMessage());
+            error_log('User::_set_data query error: ' . $e->getMessage() . ' | SQL: ' . $sql);
             return false;
         }
     }
@@ -125,14 +152,15 @@ class User
 
     public function authenticate()
     {
+        // Placeholder for authentication logic
     }
 
     public function setDob($year, $month, $day)
     {
         if (checkdate($month, $day, $year)) { 
             return $this->_set_data('dob', sprintf('%04d-%02d-%02d', (int)$year, (int)$month, (int)$day));
-        } else return false;
+        } else {
+            return false;
+        }
     }
-
 }
-
