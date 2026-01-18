@@ -3,8 +3,11 @@
 class User
 {
     public static function signup($user, $pass, $email, $phone)
-    {   
-        $pass = md5($pass);
+    {           
+        $options = [
+            'cost' => 9,
+        ];
+        $pass = password_hash($pass, PASSWORD_BCRYPT, $options);
         $conn = Database::getConnection();
         $sql = "INSERT INTO `auth` (`username`, `password`, `email`, `phone`, `active`) VALUES ('"
             . $conn->real_escape_string($user) . "', '" . $conn->real_escape_string($pass) . "', '" . $conn->real_escape_string($email) . "', '" . $conn->real_escape_string($phone) . "', '1')";
@@ -22,14 +25,16 @@ class User
 
     public static function login($user, $pass)
     {
-        // validate using MD5-hashed password only
-        $md = md5($pass);
+        // verify using password_hash() stored value
         $conn = Database::getConnection();
         $user_esc = $conn->real_escape_string($user);
-        $query = "SELECT * FROM `auth` WHERE `username` = '" . $user_esc . "' AND `password` = '" . $conn->real_escape_string($md) . "' LIMIT 1";
+        $query = "SELECT * FROM `auth` WHERE `username` = '" . $user_esc . "' LIMIT 1";
         $result = $conn->query($query);
         if ($result && $result->num_rows == 1) {
-            return $result->fetch_assoc();
+            $row = $result->fetch_assoc();
+            if (isset($row['password']) && password_verify($pass, $row['password'])) {
+                return $row;
+            }
         }
 
         return false;
