@@ -3,7 +3,8 @@
 class User
 {
     public static function signup($user, $pass, $email, $phone)
-    {
+    {   
+        $pass = md5($pass);
         $conn = Database::getConnection();
         $sql = "INSERT INTO `auth` (`username`, `password`, `email`, `phone`, `active`) VALUES ('"
             . $conn->real_escape_string($user) . "', '" . $conn->real_escape_string($pass) . "', '" . $conn->real_escape_string($email) . "', '" . $conn->real_escape_string($phone) . "', '1')";

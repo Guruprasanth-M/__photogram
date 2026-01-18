@@ -8,7 +8,7 @@ class Database
         if (Database::$conn == null) {
             $servername = "test";
             $username = "test";
-            $password = "test.test.test:test";
+            $password = "test";
             $dbname = "test";
         
             // Create connection
