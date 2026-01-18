@@ -18,4 +18,36 @@ class User
             return $e->getMessage();
         }
     }
+
+    public static function login($user, $pass)
+    {
+    }
+
+    public function __construct($username)
+    {
+        $this->conn = Database::getConnection();
+        $this->conn->query();
+    }
+
+    public function authenticate()
+    {
+    }
+
+    public function setBio()
+    {
+    }
+
+    public function getBio()
+    {
+    }
+
+    public function setAvatar()
+    {
+    }
+
+    public function getAvatar()
+    {
+    }
 }
+
+

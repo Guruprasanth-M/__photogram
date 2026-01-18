@@ -2,7 +2,7 @@
 <?php
 include 'libs/load.php';
 
-$result = signup("sibidharan", "password", "sibi@test.test", "9999999999");
+$result = signup("test", "test", "test@test.test", "test");
 if ($result === true) {
     echo "Success";
 } else {
