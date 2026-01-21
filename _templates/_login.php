@@ -37,6 +37,9 @@ if (Session::isset("session_token")) {
             $userSession = new UserSession(Session::get("session_token"));
             $userObj = $userSession->getUser();
             $logged_username = $userObj->getUsername();
+            // Ensure session variables are set for setnget.php
+            Session::set('is_loggedin', true);
+            Session::set('session_user', ['username' => $logged_username]);
         } else {
             // Invalid session - clear it
             Session::destroy();
@@ -52,6 +55,9 @@ if (!$logged_in && $username !== '' && $password !== '') {
     if ($token) {
         $logged_in = true;
         $logged_username = $username;
+        // Also set session variables that setnget.php expects
+        Session::set('is_loggedin', true);
+        Session::set('session_user', ['username' => $username]);
     } else {
         $error_message = 'Invalid username or password';
     }
