@@ -14,6 +14,9 @@ class Session
     public static function destroy()
     {
         session_destroy();
+        /*
+        If UserSession is active, set it to inactive.
+        */
     }
 
     public static function set($key, $value)

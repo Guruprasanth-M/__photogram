@@ -61,19 +61,30 @@ class User
 
     public function __construct($username)
     {
+        // Handle case where an array is passed (e.g., from login result)
+        if (is_array($username)) {
+            if (isset($username['username'])) {
+                $username = $username['username'];
+            } elseif (isset($username['id'])) {
+                $username = $username['id'];
+            } else {
+                throw new Exception("Invalid username parameter");
+            }
+        }
         $this->conn = Database::getConnection();
         $this->username = $username;
         $this->id = null;
         $u = $this->conn->real_escape_string($username);
-        $sql = "SELECT `id` FROM `auth` WHERE `username`= '" . $u . "' LIMIT 1";
+        $sql = "SELECT `id` FROM `auth` WHERE `username`= '$u' OR `id` = '$u' LIMIT 1";
         $result = $this->conn->query($sql);
-        if ($result && $result->num_rows) {
+        if ($result->num_rows) {
             $row = $result->fetch_assoc();
-            $this->id = $row['id'];
+            $this->id = $row['id']; //Updating this from database
         } else {
-            throw new Exception("Username doesn't exist");
+            throw new Exception("Username does't exist");
         }
     }
+
 
     private function _get_data($var)
     {
@@ -128,8 +139,29 @@ class User
             // Row exists - UPDATE it
             $sql = "UPDATE `users` SET `$var`='" . $safe . "' WHERE `id`=$id LIMIT 1";
         } else {
-            // Row doesn't exist - INSERT it
-            $sql = "INSERT INTO `users` (`id`, `$var`) VALUES ($id, '" . $safe . "')";
+            // Row doesn't exist - INSERT it with defaults for NOT NULL columns
+            // Get all columns and provide empty defaults
+            $cols = $this->conn->query("SHOW COLUMNS FROM `users`");
+            $colNames = [];
+            $colVals = [];
+            if ($cols) {
+                while ($c = $cols->fetch_assoc()) {
+                    $colName = $c['Field'];
+                    $colNames[] = "`$colName`";
+                    if ($colName === 'id') {
+                        $colVals[] = $id;
+                    } elseif ($colName === $var) {
+                        $colVals[] = "'" . $safe . "'";
+                    } else {
+                        $colVals[] = "''";
+                    }
+                }
+            }
+            if (count($colNames) > 0) {
+                $sql = "INSERT INTO `users` (" . implode(',', $colNames) . ") VALUES (" . implode(',', $colVals) . ")";
+            } else {
+                $sql = "INSERT INTO `users` (`id`, `$var`) VALUES ($id, '" . $safe . "')";
+            }
         }
         
         try {
@@ -148,11 +180,6 @@ class User
     public function getUsername()
     {
         return $this->username;
-    }
-
-    public function authenticate()
-    {
-        // Placeholder for authentication logic
     }
 
     public function setDob($year, $month, $day)
