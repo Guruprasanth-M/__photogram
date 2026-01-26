@@ -21,8 +21,7 @@ jobs:
           rm -rf /home/azureuser/htdocs/photogram
           mkdir -p /home/azureuser/htdocs/photogram
 
-          cp -r $(pwd)* \
-                /home/azureuser/htdocs/photogram/
+          cp -r "$(pwd)"/* /home/azureuser/htdocs/photogram/
 
           rm -rf /home/azureuser/htdocs/photogram/.git
 
