@@ -18,13 +18,15 @@ jobs:
           echo "Deploying application..."
 
           rm -rf /home/azureuser/htdocs/photogram
-          
+
           mkdir -p /home/azureuser/htdocs/photogram
 
           cp -r "$(pwd)"/* /home/azureuser/htdocs/photogram/
 
           rm -rf /home/azureuser/htdocs/photogram/.git
-
+          rm -rf /home/azureuser/htdocs/photogram/htdocs/.gitignore
+          rm -rf /home/azureuser/htdocs/photogram/htdocs/README.md
+          rm -rf /home/azureuser/htdocs/photogram/htdocs/.gitattributes
           cp /home/azureuser/photogramconfig.json /home/azureuser/htdocs/photogram/project/
 
           echo "Application successfully deployed."
