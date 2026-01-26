@@ -72,14 +72,14 @@ class User
             }
         }
         $this->conn = Database::getConnection();
-        $this->username = $username;
         $this->id = null;
         $u = $this->conn->real_escape_string($username);
-        $sql = "SELECT `id` FROM `auth` WHERE `username`= '$u' OR `id` = '$u' LIMIT 1";
+        $sql = "SELECT `id`, `username` FROM `auth` WHERE `username`= '$u' OR `id` = '$u' LIMIT 1";
         $result = $this->conn->query($sql);
         if ($result->num_rows) {
             $row = $result->fetch_assoc();
-            $this->id = $row['id']; //Updating this from database
+            $this->id = $row['id'];
+            $this->username = $row['username'];
         } else {
             throw new Exception("Username does't exist");
         }

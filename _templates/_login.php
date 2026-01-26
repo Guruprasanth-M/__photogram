@@ -2,6 +2,7 @@
 
 $username = isset($_POST['username']) ? trim($_POST['username']) : '';
 $password = isset($_POST['password']) ? $_POST['password'] : '';
+$fingerprint = isset($_POST['fingerprint']) ? $_POST['fingerprint'] : null;
 $error_message = '';
 $logged_in = false;
 $logged_username = null;
@@ -51,7 +52,7 @@ if (Session::isset("session_token")) {
 
 // Handle login form submission
 if (!$logged_in && $username !== '' && $password !== '') {
-    $token = UserSession::authenticate($username, $password);
+    $token = UserSession::authenticate($username, $password, $fingerprint);
     if ($token) {
         $logged_in = true;
         $logged_username = $username;

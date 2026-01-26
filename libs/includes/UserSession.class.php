@@ -7,7 +7,7 @@ class UserSession
      *
      * @return SessionID
      */
-    public static function authenticate($user, $pass)
+    public static function authenticate($user, $pass, $fingerprint = null)
     {
         $loginResult = User::login($user, $pass);
         if ($loginResult) {
@@ -21,13 +21,19 @@ class UserSession
             $conn = Database::getConnection();
             $ip = $_SERVER['REMOTE_ADDR'];
             $agent = $_SERVER['HTTP_USER_AGENT'];
+            if (empty($fingerprint)) {
+                error_log("UserSession::authenticate - Warning: fingerprint is empty for user $username");
+            }
             $token = md5(rand(0, 9999999) . $ip . $agent . time());
-            $sql = "INSERT INTO `session` (`uid`, `token`, `login_time`, `ip`, `user_agent`, `active`)
-            VALUES ('" . $userObj->id . "', '" . $conn->real_escape_string($token) . "', now(), '" . $conn->real_escape_string($ip) . "', '" . $conn->real_escape_string($agent) . "', '1')";
+            $sql = "INSERT INTO `session` (`uid`, `token`, `login_time`, `ip`, `user_agent`, `active`, `fingerprint`)
+            VALUES ('" . $userObj->id . "', '" . $conn->real_escape_string($token) . "', now(), '" . $conn->real_escape_string($ip) . "', '" . $conn->real_escape_string($agent) . "', '1', '" . $conn->real_escape_string($fingerprint) . "')";
             if ($conn->query($sql)) {
+                self::deleteExpired(); // Clean up old sessions
                 Session::set('session_token', $token);
+                Session::set('fingerprint', $fingerprint);
                 return $token;
             } else {
+                error_log("UserSession::authenticate sql error: " . $conn->error);
                 return false;
             }
         } else {
@@ -52,7 +58,9 @@ class UserSession
                 if ($session->isValid() and $session->isActive()) {
                     if ($_SERVER['REMOTE_ADDR'] == $session->getIP()) {
                         if ($_SERVER['HTTP_USER_AGENT'] == $session->getUserAgent()) {
-                            return true;
+                             if ($session->getFingerprint() == Session::get('fingerprint')){
+                                return true;
+                            } else throw new Exception("FingerPrint doesn't match");
                         } else throw new Exception("User agent does't match");
                     } else throw new Exception("IP does't match");
                 } else {
@@ -96,12 +104,25 @@ class UserSession
     {
         if (isset($this->data['login_time'])) {
             $login_time = DateTime::createFromFormat('Y-m-d H:i:s', $this->data['login_time']);
-            if (3600 > time() - $login_time->getTimestamp()) {
+            $timeout = get_config('session_timeout', 3600); // Default 1 hour
+            if ($timeout > time() - $login_time->getTimestamp()) {
                 return true;
             } else {
                 return false;
             }
-        } else throw new Exception("login tiem is null");
+        } else throw new Exception("login time is null");
+    }
+
+    /**
+     * Delete all sessions that have exceeded the timeout
+     */
+    public static function deleteExpired()
+    {
+        $conn = Database::getConnection();
+        $timeout = get_config('session_timeout', 3600);
+        // Using TIMESTAMPDIFF to find sessions older than timeout seconds
+        $sql = "DELETE FROM `session` WHERE TIMESTAMPDIFF(SECOND, `login_time`, NOW()) > $timeout";
+        return $conn->query($sql);
     }
 
     public function getIP()
@@ -127,6 +148,13 @@ class UserSession
     {
         if (isset($this->data['active'])) {
             return $this->data['active'] ? true : false;
+        }
+    }
+
+    public function getFingerprint()
+    {
+        if (isset($this->data['fingerprint'])) {
+            return $this->data['fingerprint'];
         }
     }
 
