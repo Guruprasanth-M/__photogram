@@ -15,17 +15,17 @@ jobs:
 
       - name: Deploy application
         run: |
-          pwd
           echo "Deploying application..."
 
           rm -rf /home/azureuser/htdocs/photogram
+          
           mkdir -p /home/azureuser/htdocs/photogram
 
           cp -r "$(pwd)"/* /home/azureuser/htdocs/photogram/
 
           rm -rf /home/azureuser/htdocs/photogram/.git
 
-          echo "Application successfully deployed."
-
           cp /home/azureuser/photogramconfig.json /home/azureuser/htdocs/photogram/project/
+
+          echo "Application successfully deployed."
 
