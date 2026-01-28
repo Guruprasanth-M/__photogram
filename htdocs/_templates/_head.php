@@ -4,7 +4,7 @@
     <meta name="description" content="">
     <meta name="author" content="Selfmade Ninja Academy">
     <meta name="generator" content="Hugo 0.88.1">
-    <title>Login to Photogram</title>
+    <title>Photogram | Share your story</title>
 
     <!-- Bootstrap core CSS -->
     <link href="<?=get_config('base_path')?>assets/dist/css/bootstrap.min.css" rel="stylesheet">

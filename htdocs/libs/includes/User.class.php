@@ -5,6 +5,7 @@ class User
     private $conn;
     private $username;
     public $id;
+    private $data; // Local cache for user data
 
     public function __call($name, $arguments)
     {
@@ -57,7 +58,7 @@ class User
     {
         $conn = Database::getConnection();
         $user_esc = $conn->real_escape_string($user);
-        $query = "SELECT * FROM `auth` WHERE `username` = '" . $user_esc . "' OR `email` = '" . $user_esc . "' LIMIT 1";
+        $query = "SELECT * FROM `auth` WHERE (`username` = '$user_esc' OR `email` = '$user_esc') AND `blocked` = '0' LIMIT 1";
         $result = $conn->query($query);
         if ($result && $result->num_rows == 1) {
             $row = $result->fetch_assoc();
@@ -71,18 +72,23 @@ class User
 
     public function __construct($username)
     {
+        $this->conn = Database::getConnection();
+        $this->id = null;
+        
         // Handle case where an array is passed (e.g., from login result)
+        // This is much faster as it avoids an extra DB query
         if (is_array($username)) {
-            if (isset($username['username'])) {
+            if (isset($username['id']) && isset($username['username'])) {
+                $this->id = $username['id'];
+                $this->username = $username['username'];
+                return; // Early return, we have everything we need
+            } elseif (isset($username['username'])) {
                 $username = $username['username'];
             } elseif (isset($username['id'])) {
                 $username = $username['id'];
-            } else {
-                throw new Exception("Invalid username parameter");
             }
         }
-        $this->conn = Database::getConnection();
-        $this->id = null;
+        
         $u = $this->conn->real_escape_string($username);
         $sql = "SELECT `id`, `username` FROM `auth` WHERE `username`= '$u' OR `id` = '$u' LIMIT 1";
         $result = $this->conn->query($sql);
@@ -91,7 +97,7 @@ class User
             $this->id = $row['id'];
             $this->username = $row['username'];
         } else {
-            throw new Exception("Username does't exist");
+            throw new Exception("User not found: $username");
         }
     }
 
@@ -104,22 +110,20 @@ class User
         if (empty($this->id)) {
             return null;
         }
-        $id = (int)$this->id;
-        $var_esc = $this->conn->real_escape_string($var);
-        
-        // Ensure column exists first to avoid SQL errors
-        $colRes = $this->conn->query("SHOW COLUMNS FROM `users` LIKE '" . $var_esc . "'");
-        if (!($colRes && $colRes->num_rows == 1)) {
-            return null;
+
+        // Lazy load all user data at once for efficiency
+        if (!$this->data) {
+            $id = (int)$this->id;
+            $sql = "SELECT * FROM `users` WHERE `id` = $id LIMIT 1";
+            $result = $this->conn->query($sql);
+            if ($result && $result->num_rows == 1) {
+                $this->data = $result->fetch_assoc();
+            } else {
+                $this->data = []; // No data yet
+            }
         }
         
-        $sql = "SELECT `$var` FROM `users` WHERE `id` = $id LIMIT 1";
-        $result = $this->conn->query($sql);
-        if ($result && $result->num_rows == 1) {
-            $row = $result->fetch_assoc();
-            return array_key_exists($var, $row) ? $row[$var] : null;
-        }
-        return null;
+        return isset($this->data[$var]) ? $this->data[$var] : null;
     }
 
     // FIXED: Works regardless of PRIMARY KEY setup
@@ -135,54 +139,34 @@ class User
         $safe = $this->conn->real_escape_string($data);
         $var_esc = $this->conn->real_escape_string($var);
         
-        // Ensure column exists before attempting update
-        $colRes = $this->conn->query("SHOW COLUMNS FROM `users` LIKE '" . $var_esc . "'");
-        if (!($colRes && $colRes->num_rows == 1)) {
-            error_log('User::_set_data missing column: ' . $var);
+        // Professional UPSERT logic: Efficiently inserts or updates in one query
+        $sql = "INSERT INTO `users` (`id`, `$var_esc`) VALUES ($id, '$safe') 
+                ON DUPLICATE KEY UPDATE `$var_esc` = '$safe'";
+        
+        if ($this->conn->query($sql)) {
+            $this->data = null; // Invalidate cache
+            return true;
+        } else {
+            error_log('User::_set_data failed: ' . $this->conn->error);
             return false;
         }
+    }
+
+    public function deleteUser()
+    {
+        if (empty($this->id)) return false;
+        $id = (int)$this->id;
+        $conn = Database::getConnection();
         
-        // First, check if row exists
-        $check = $this->conn->query("SELECT `id` FROM `users` WHERE `id` = $id LIMIT 1");
-        
-        if ($check && $check->num_rows > 0) {
-            // Row exists - UPDATE it
-            $sql = "UPDATE `users` SET `$var`='" . $safe . "' WHERE `id`=$id LIMIT 1";
-        } else {
-            // Row doesn't exist - INSERT it with defaults for NOT NULL columns
-            // Get all columns and provide empty defaults
-            $cols = $this->conn->query("SHOW COLUMNS FROM `users`");
-            $colNames = [];
-            $colVals = [];
-            if ($cols) {
-                while ($c = $cols->fetch_assoc()) {
-                    $colName = $c['Field'];
-                    $colNames[] = "`$colName`";
-                    if ($colName === 'id') {
-                        $colVals[] = $id;
-                    } elseif ($colName === $var) {
-                        $colVals[] = "'" . $safe . "'";
-                    } else {
-                        $colVals[] = "''";
-                    }
-                }
-            }
-            if (count($colNames) > 0) {
-                $sql = "INSERT INTO `users` (" . implode(',', $colNames) . ") VALUES (" . implode(',', $colVals) . ")";
-            } else {
-                $sql = "INSERT INTO `users` (`id`, `$var`) VALUES ($id, '" . $safe . "')";
-            }
-        }
-        
+        $conn->begin_transaction();
         try {
-            if ($this->conn->query($sql)) {
-                return true;
-            } else {
-                error_log('User::_set_data query failed: ' . $this->conn->error . ' | SQL: ' . $sql);
-                return false;
-            }
-        } catch (mysqli_sql_exception $e) {
-            error_log('User::_set_data query error: ' . $e->getMessage() . ' | SQL: ' . $sql);
+            $conn->query("DELETE FROM `users` WHERE `id` = $id");
+            $conn->query("DELETE FROM `session` WHERE `uid` = $id");
+            $conn->query("DELETE FROM `auth` WHERE `id` = $id");
+            $conn->commit();
+            return true;
+        } catch (Exception $e) {
+            $conn->rollback();
             return false;
         }
     }

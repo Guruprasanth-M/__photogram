@@ -26,12 +26,3 @@ function load_template($name)
 {
     Session::loadTemplate($name);
 }
-
-function validate_credentials($username, $password)
-{
-    if ($username == "sibi@selfmade.ninja" and $password == "password") {
-        return true;
-    } else {
-        return false;
-    }
-}

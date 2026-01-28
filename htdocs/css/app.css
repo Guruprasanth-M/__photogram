@@ -194,6 +194,129 @@ footer p {
     font-size: 0.9rem;
 }
 
+/* Profile Sidebar (Offcanvas) Styles */
+.offcanvas {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(20px);
+    border-left: 1px solid var(--border-color);
+    color: var(--text-main);
+    width: 300px !important;
+}
+
+.offcanvas-header {
+    border-bottom: 1px solid var(--border-color);
+    padding: 1.5rem;
+}
+
+.offcanvas-body {
+    padding: 1rem 0;
+}
+
+.user-info-section {
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-info-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+}
+
+.user-info-details {
+    line-height: 1.2;
+}
+
+.user-info-name {
+    font-weight: 600;
+    color: var(--text-main);
+    display: block;
+}
+
+.user-info-username {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0.75rem 1.5rem;
+    color: var(--text-main);
+    text-decoration: none;
+    transition: background 0.2s ease;
+    font-size: 0.95rem;
+}
+
+.sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--accent-blue);
+    text-decoration: none;
+}
+
+.sidebar-link svg {
+    width: 18px;
+    height: 18px;
+    color: var(--text-muted);
+}
+
+.sidebar-link:hover svg {
+    color: var(--accent-blue);
+}
+
+.sidebar-separator {
+    height: 1px;
+    background: var(--border-color);
+    margin: 0.5rem 0;
+}
+
+.nav-avatar-btn {
+    padding: 0;
+    border: none;
+    background: none;
+}
+
+.nav-avatar-img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--border-color);
+    transition: border-color 0.2s;
+}
+
+.nav-avatar-img:hover {
+    border-color: var(--accent-blue);
+}
+
+.nav-avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px; /* Slightly rounded for more professional feel */
+    border: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+}
+
+.nav-avatar-placeholder:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+.nav-avatar-placeholder svg {
+    width: 18px;
+    height: 18px;
+}
+
 /* Success/Error Alerts */
 .border-success {
     border: 1px solid rgba(35, 134, 54, 0.5) !important;
