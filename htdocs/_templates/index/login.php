@@ -4,8 +4,8 @@
 			<h1 class="fw-light">Join us to share memories.</h1>
 			<p class="lead text-muted">We remember even when you forget.</p>
 			<p>
-				<a href="#" class="btn btn-success my-2">Login</a>
-				<a href="#" class="btn btn-secondary my-2">Register</a>
+				<a href="/login.php" class="btn btn-success my-2">Login</a>
+				<a href="/signup.php" class="btn btn-secondary my-2">Register</a>
 			</p>
 		</div>
 	</div>

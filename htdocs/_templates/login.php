@@ -1,8 +1,8 @@
 <?php
 
 $login = true;
-Session::set('mode', 'web');
-Session::set('test', 'websdkjfnsdkjfn');
+
+//TODO: Redirect to a requested URL instead of base path on login
 if (isset($_POST['email_address']) and isset($_POST['password'])) {
     $email_address = $_POST['email_address'];
     $password = $_POST['password'];
