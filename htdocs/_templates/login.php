@@ -47,24 +47,24 @@ if (!$login) {
 <main class="form-signin">
 	<form method="post" action="<?=get_config('base_path')?>login.php">
 		<img class="mb-4 d-block mx-auto" src="https://git.selfmade.ninja/uploads/-/system/appearance/logo/1/Logo_Dark.png" alt=""
-			height="50">
+			height="60">
 		<input name="fingerprint" type="hidden" id="fingerprint" value="">
-		<h1 class="h3 mb-3 fw-normal">Login</h1>
+		<h1 class="h3 mb-4 fw-normal text-center">Login</h1>
 
 		<div class="form-floating mb-3">
 			<input name="email_address" type="text" class="form-control" id="floatingInput"
-				placeholder="name@example.com">
+				placeholder="name@example.com" required autocomplete="off">
 			<label for="floatingInput">Username or Email</label>
 		</div>
-		<div class="form-floating mb-3">
-			<input name="password" type="password" class="form-control" id="floatingPassword" placeholder="Password">
+		<div class="form-floating mb-4">
+			<input name="password" type="password" class="form-control" id="floatingPassword" placeholder="Password" required>
 			<label for="floatingPassword">Password</label>
 		</div>
 
-		<button class="w-100 btn btn-lg btn-primary mb-3" type="submit">Sign in</button>
+		<button class="w-100 btn btn-lg btn-primary mb-4" type="submit">Sign in</button>
+        
         <div class="text-center">
-            <span class="text-muted">Not a member?</span> 
-            <a href="<?=get_config('base_path')?>signup.php" class="btn btn-link p-0">Register Now</a>
+            <p class="text-muted mb-0">New here? <a href="<?=get_config('base_path')?>signup.php" class="fw-bold">Create an account</a></p>
         </div>
 	</form>
 </main>

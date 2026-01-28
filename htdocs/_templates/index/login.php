@@ -1,12 +1,12 @@
-<section class="py-5 text-center container">
+<section class="hero-section text-center container">
 	<div class="row py-lg-5">
-		<div class="col-lg-6 col-md-8 mx-auto">
-			<h1 class="fw-light">Join us to share memories.</h1>
-			<p class="lead text-muted">We remember even when you forget.</p>
-			<p>
-				<a href="<?=get_config('base_path')?>login.php" class="btn btn-success my-2">Login</a>
-				<a href="<?=get_config('base_path')?>signup.php" class="btn btn-secondary my-2">Register</a>
-			</p>
+		<div class="col-lg-8 col-md-10 mx-auto">
+			<h1 class="hero-title">Welcome to <span class="text-success">Photogram</span></h1>
+			<p class="lead text-muted px-lg-5">The most elegant way to share and remember your best moments. Join a community of visual storytellers.</p>
+			<div class="mt-4">
+				<a href="<?=get_config('base_path')?>login.php" class="btn btn-primary btn-lg px-5 me-2">Get Started</a>
+				<a href="<?=get_config('base_path')?>signup.php" class="btn btn-secondary btn-lg px-5">Join Now</a>
+			</div>
 		</div>
 	</div>
 </section>
