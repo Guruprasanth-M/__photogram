@@ -181,6 +181,24 @@ a:hover {
 
 .card-body {
     padding: 1.5rem;
+    color: var(--text-main);
+}
+
+.card-text {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.btn-outline-secondary {
+    border-color: var(--border-color);
+    color: var(--text-muted);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: #fff;
 }
 
 /* Footer Style */
