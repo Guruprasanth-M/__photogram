@@ -1,6 +1,6 @@
 <?php
 
-use MongoDB\Driver\Session as DriverSession;
+
 
 class Session
 {
@@ -60,11 +60,15 @@ class Session
 
     public static function loadTemplate($name)
     {
-        $script = $_SERVER['DOCUMENT_ROOT'] . get_config('base_path'). "_templates/$name.php";
+        $name = str_replace('/htdocs/', '', $name); // Clean up if someone passed /htdocs/
+        $script = dirname(__DIR__, 2) . "/_templates/$name.php";
         if (is_file($script)) {
             include $script;
         } else {
-            Session::loadTemplate('_error');
+            // Avoid infinite loops if _error is missing
+            if ($name !== '_error') {
+                Session::loadTemplate('_error');
+            }
         }
     }
 
@@ -89,7 +93,7 @@ class Session
 
     public static function ensureLogin(){
         if(!Session::isAuthenticated()){
-            header("Location: /login.php");
+            header("Location: " . get_config('base_path') . "login.php");
             die();
         }
     }

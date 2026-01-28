@@ -24,7 +24,7 @@ function get_config($key, $default=null)
 
 function load_template($name)
 {
-    include $_SERVER['DOCUMENT_ROOT'] . get_config('base_path'). "_templates/$name.php"; //not consistant.
+    Session::loadTemplate($name);
 }
 
 function validate_credentials($username, $password)

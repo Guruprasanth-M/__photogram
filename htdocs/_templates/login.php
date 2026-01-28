@@ -8,10 +8,13 @@ if (isset($_POST['email_address']) and isset($_POST['password'])) {
     $password = $_POST['password'];
 
     $result = UserSession::authenticate($email_address, $password);
+    if ($result) {
+        Session::$usersession = UserSession::authorize($result);
+    }
     $login = false;
 }
 if (!$login) {
-    if ($result) {
+    if ($result && Session::$usersession) {
         ?>
 <script>
 	window.location.href = "<?=get_config('base_path')?>"
@@ -30,10 +33,18 @@ if (!$login) {
     }
 } else {
     ?>
+	<?php if (isset($_GET['signup']) && $_GET['signup'] == 'success') { ?>
+		<main class="container">
+			<div class="bg-light p-5 rounded mt-3">
+				<h1>Signup Success</h1>
+				<p class="lead">Registration successful! Please login with your credentials below.</p>
+			</div>
+		</main>
+	<?php } ?>
 
 
 <main class="form-signin">
-	<form method="post" action="login.php">
+	<form method="post" action="<?=get_config('base_path')?>login.php">
 		<img class="mb-4" src="https://git.selfmade.ninja/uploads/-/system/appearance/logo/1/Logo_Dark.png" alt=""
 			height="50">
 		<input name="fingerprint" type="hidden" id="fingerprint" value="">

@@ -26,10 +26,20 @@ class User
         ];
         $pass = password_hash($pass, PASSWORD_BCRYPT, $options);
         $conn = Database::getConnection();
+        
+        // Check if user or email already exists to provide better feedback
+        $user_esc = $conn->real_escape_string($user);
+        $email_esc = $conn->real_escape_string($email);
+        $check_sql = "SELECT `id` FROM `auth` WHERE `username` = '$user_esc' OR `email` = '$email_esc' LIMIT 1";
+        $check_res = $conn->query($check_sql);
+        if ($check_res && $check_res->num_rows > 0) {
+            return "Username or Email already exists.";
+        }
+
         $sql = "INSERT INTO `auth` (`username`, `password`, `email`, `phone`, `active`) VALUES ('"
-            . $conn->real_escape_string($user) . "', '" 
+            . $user_esc . "', '" 
             . $conn->real_escape_string($pass) . "', '" 
-            . $conn->real_escape_string($email) . "', '" 
+            . $email_esc . "', '" 
             . $conn->real_escape_string($phone) . "', '0')";
 
         try {
@@ -47,7 +57,7 @@ class User
     {
         $conn = Database::getConnection();
         $user_esc = $conn->real_escape_string($user);
-        $query = "SELECT * FROM `auth` WHERE `username` = '" . $user_esc . "' LIMIT 1";
+        $query = "SELECT * FROM `auth` WHERE `username` = '" . $user_esc . "' OR `email` = '" . $user_esc . "' LIMIT 1";
         $result = $conn->query($query);
         if ($result && $result->num_rows == 1) {
             $row = $result->fetch_assoc();

@@ -22,8 +22,14 @@ class UserSession
             }
             
             $token = md5(rand(0, 9999999) . $ip . $agent . time());
+            $tokenEsc = $conn->real_escape_string($token);
+            $ipEsc = $conn->real_escape_string($ip);
+            $agentEsc = $conn->real_escape_string($agent);
+            $fingerprintEsc = $conn->real_escape_string($fingerprint);
+
+            $uidEsc = $conn->real_escape_string($userObj->id);
             $sql = "INSERT INTO `session` (`uid`, `token`, `login_time`, `ip`, `user_agent`, `active`, `fingerprint`)
-            VALUES ('$userObj->id', '$token', now(), '$ip', '$agent', '1', '$fingerprint')";
+            VALUES ('$uidEsc', '$tokenEsc', now(), '$ipEsc', '$agentEsc', '1', '$fingerprintEsc')";
 
             if ($conn->query($sql)) {
                 self::deleteExpired(); // Clean up old sessions
@@ -59,14 +65,22 @@ class UserSession
                              if ($session->getFingerprint() == Session::get('fingerprint')){
                                 Session::$user = $session->getUser();
                                 return $session;
-                            } else throw new Exception("FingerPrint doesn't match");
-                        } else throw new Exception("User agent does't match");
-                    } else throw new Exception("IP does't match");
+                            } else {
+                                throw new Exception("FingerPrint doesn't match");
+                            }
+                        } else {
+                            throw new Exception("User agent does't match");
+                        }
+                    } else {
+                        throw new Exception("IP does't match");
+                    }
                 } else {
                     $session->removeSession();
                     throw new Exception("Invalid session");
                 }
-            } else throw new Exception("IP and User_agent is null");
+            } else {
+                throw new Exception("IP and User_agent is null");
+            }
         } catch (Exception $e) {
             return false;
         }
